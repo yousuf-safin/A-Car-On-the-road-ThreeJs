@@ -1,0 +1,33 @@
+{
+  "name": "a-car-on-the-road-threejs",
+  "version": "1.0.0",
+  "description": "A simple Three.js project with a car on the road",
+  "main": "script.js",
+  "scripts": {
+    "dev": "vite", 
+    "build": "vite build", 
+    "preview": "vite preview", 
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yousuf-safin/A-Car-On-the-road-ThreeJs.git"
+  },
+  "keywords": [
+    "Three",
+    "js",
+    "car"
+  ],
+  "author": "Yousuf",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yousuf-safin/A-Car-On-the-road-ThreeJs/issues"
+  },
+  "homepage": "https://github.com/yousuf-safin/A-Car-On-the-road-ThreeJs#readme",
+  "devDependencies": {
+    "vite": "^6.2.1"
+  },
+  "dependencies": {
+    "three": "^0.174.0"
+  }
+}
