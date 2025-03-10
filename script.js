@@ -8,7 +8,6 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
 // Lights
@@ -35,16 +34,13 @@ loader.load('assets/car.glb', function(gltf) {
     car.scale.set(1, 1, 1);
     car.position.set(0, 0, 0);
 
-    // Debugging: Print all object names
+    // Identify wheels
     car.traverse((child) => {
-        console.log("Object in car model:", child.name); // Debugging: See object names
         if (child.isMesh) {
             child.castShadow = true;
             child.receiveShadow = true;
-
-            // Check if the object's name matches the wheel names from the console
-            if (child.name === "wheel_24" || child.name === "wheel001_29" || child.name === "wheel002_34") {
-                wheels.push(child); // Store the wheel
+            if (child.name.toLowerCase().includes("wheel")) {
+                wheels.push(child);
                 console.log("Wheel detected:", child.name);
             }
         }
@@ -57,12 +53,7 @@ loader.load('assets/car.glb', function(gltf) {
 
 // Load Road Texture
 const textureLoader = new THREE.TextureLoader();
-const roadTexture = textureLoader.load('assets/road.jpg', () => {
-    console.log("Road texture loaded successfully");
-}, undefined, (err) => {
-    console.error("Error loading road texture:", err);
-});
-
+const roadTexture = textureLoader.load('assets/road.jpg');
 roadTexture.wrapS = roadTexture.wrapT = THREE.RepeatWrapping;
 roadTexture.repeat.set(5, 1);
 
@@ -79,33 +70,30 @@ let carRotation = 0;
 const maxSpeed = 0.1;
 const acceleration = 0.01;
 const deceleration = 0.02;
-const wheelRadius = 0.3; // Approximate radius of the wheels (adjust based on your model)
+const wheelRadius = 0.3;
 
-// Keyboard Interaction: Car Movement with Arrow Keys
+// Keyboard Interaction
 document.addEventListener('keydown', (event) => {
     switch (event.key) {
-        case 'ArrowUp': // Accelerate forward
+        case 'ArrowUp':
             carSpeed = Math.min(carSpeed - acceleration, -maxSpeed);
             break;
-        case 'ArrowDown': // Accelerate backward
+        case 'ArrowDown':
             carSpeed = Math.max(carSpeed + acceleration, maxSpeed);
             break;
-        case 'ArrowLeft': // Rotate car left
+        case 'ArrowLeft':
             carRotation += 0.02;
             break;
-        case 'ArrowRight': // Rotate car right
+        case 'ArrowRight':
             carRotation -= 0.02;
+            break;
+        case ' ':
+            carSpeed = 0; // Brake when space is pressed
             break;
     }
 });
 
-document.addEventListener('keyup', (event) => {
-    if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-        carSpeed = 0; 
-    }
-});
-
-// Camera Movement with W, A, S, D
+// Camera Movement
 const cameraSpeed = 0.1;
 document.addEventListener('keydown', (event) => {
     switch (event.key) {
@@ -132,30 +120,29 @@ document.addEventListener('mousemove', (event) => {
     directionalLight.position.z = mouseY * 10;
 });
 
-// Animation: Rotate Car Wheels
+// Rotate Wheels
 function rotateWheels(deltaTime) {
     if (wheels.length > 0) {
-        const circumference = 2 * Math.PI * wheelRadius; // Circumference of the wheel
-        const rotationSpeed = (carSpeed / circumference) * Math.PI * 2; // Rotation speed in radians
-
+        const circumference = 2 * Math.PI * wheelRadius;
+        const rotationSpeed = (carSpeed / circumference) * Math.PI * 2;
         wheels.forEach((wheel) => {
-            wheel.rotation.x += rotationSpeed * deltaTime; // Rotate wheels based on car speed
+            wheel.rotation.z += rotationSpeed * deltaTime;
+            console.log(`Wheel Rotating: ${wheel.name}, Speed: ${rotationSpeed}`);
         });
     }
 }
 
 // Animation Loop
-let clock = new THREE.Clock(); // Create a clock to track time
+let clock = new THREE.Clock();
 function animate() {
-    const deltaTime = clock.getDelta(); // Get the time difference since the last frame
-
+    const deltaTime = clock.getDelta();
     controls.update();
-    rotateWheels(deltaTime); // Rotate car wheels based on car speed
+    rotateWheels(deltaTime);
 
     if (car) {
         car.position.x -= Math.sin(carRotation) * carSpeed;
         car.position.z -= Math.cos(carRotation) * carSpeed;
-        car.rotation.y = carRotation; 
+        car.rotation.y = carRotation;
     }
 
     renderer.render(scene, camera);
